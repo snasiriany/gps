@@ -53,6 +53,7 @@ class CostFK(Cost):
         dist = pt - tgt
         # TODO - These should be partially zeros so we're not double
         #        counting.
+ 
         #        (see pts_jacobian_only in matlab costinfos code)
         jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
 

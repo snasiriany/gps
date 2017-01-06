@@ -47,6 +47,39 @@ class CostDoor(Cost):
         lxx = np.zeros((T, dX, dX))
         lux = np.zeros((T, dU, dX))
 
+        #target_end_effector = np.array([0.695, 0.36, 0.55, 0.695, 0.36, 0.45, 0, 0, 0, 0, 0, 0])
+        start = 16
+        target_end_effector = sample.get(END_EFFECTOR_POINTS)[:,6:12]
+        gripper = sample.get(END_EFFECTOR_POINTS)
+        for t in range(T):
+            lx[t][16] = (gripper[t][0] - target_end_effector[t][0])
+            lx[t][17] = (gripper[t][1] - target_end_effector[t][1])
+            lx[t][18] = (gripper[t][2] - target_end_effector[t][2])
+
+            lx[t][19] = (gripper[t][3] - target_end_effector[t][3])
+            lx[t][20] = (gripper[t][4] - target_end_effector[t][4])
+            lx[t][21] = (gripper[t][5] - target_end_effector[t][5])
+
+            lxx[t][16][16] = 1
+            lxx[t][17][17] = 1
+            lxx[t][18][18] = 1
+
+            lxx[t][19][19] = 1
+            lxx[t][20][20] = 1
+            lxx[t][21][21] = 1
+
+            l[t] = (0.5)*np.linalg.norm(gripper[t][0:6] - target_end_effector[t][0:6])**2
+
+        """
+        print "door cost"
+        print l[5]
+        print lx[5]
+        #print lxx[5]
+        print "\n"
+        """
+
+
+        """
         # Choose target.
         gripper = sample.get(END_EFFECTOR_POINTS)[:,0:3]
         handle = sample.get(END_EFFECTOR_POINTS)[:,3:6]
@@ -55,30 +88,31 @@ class CostDoor(Cost):
         #22 23 24 25 26 27
 
         for t in range(T):
-            lx[t][16] = 2*(gripper[t][0] - handle[t][0])
-            lx[t][17] = 2*(gripper[t][1] - handle[t][1])
-            lx[t][18] = 2*(gripper[t][2] - handle[t][2])
+            lx[t][16] = (gripper[t][0] - handle[t][0])
+            lx[t][17] = (gripper[t][1] - handle[t][1])
+            lx[t][18] = (gripper[t][2] - handle[t][2])
 
-            lx[t][19] = -2*(gripper[t][0] - handle[t][0])
-            lx[t][20] = -2*(gripper[t][1] - handle[t][1])
-            lx[t][21] = -2*(gripper[t][2] - handle[t][2])
+            lx[t][19] = -1*(gripper[t][0] - handle[t][0])
+            lx[t][20] = -1*(gripper[t][1] - handle[t][1])
+            lx[t][21] = -1*(gripper[t][2] - handle[t][2])
 
 
-            lxx[t][16][16] = 2
-            lxx[t][16][19] = -2
-            lxx[t][17][17] = 2
-            lxx[t][17][20] = -2
-            lxx[t][18][18] = 2
-            lxx[t][18][21] = -2
+            lxx[t][16][16] = 1
+            lxx[t][16][19] = -1
+            lxx[t][17][17] = 1
+            lxx[t][17][20] = -1
+            lxx[t][18][18] = 1
+            lxx[t][18][21] = -1
 
-            lxx[t][19][19] = -2
-            lxx[t][19][16] = -2
-            lxx[t][20][20] = -2
-            lxx[t][20][17] = -2
-            lxx[t][21][21] = -2
-            lxx[t][21][18] = -2
+            lxx[t][19][19] = -1
+            lxx[t][19][16] = -1
+            lxx[t][20][20] = -1
+            lxx[t][20][17] = -1
+            lxx[t][21][21] = -1
+            lxx[t][21][18] = -1
 
-            l[t] = np.linalg.norm(gripper[t] - handle[t])**2
+            l[t] = (0.5)*np.linalg.norm(gripper[t] - handle[t])**2
+        """
 
         """
         # TODO - These should be partially zeros so we're not double
