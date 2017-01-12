@@ -44,7 +44,13 @@ class PolicyOptTf(PolicyOpt):
         self.action_tensor = None  # mu true
         self.solver = None
         self.feat_vals = None
-        self.init_network()
+        try:
+            with tf.variable_scope("my_model", reuse=True):
+                self.init_network()
+        except:
+            with tf.variable_scope("my_model", reuse=False):
+                    self.init_network()
+
         self.init_solver()
         self.var = self._hyperparams['init_var'] * np.ones(dU)
         self.sess = tf.Session()
@@ -166,8 +172,8 @@ class PolicyOptTf(PolicyOpt):
                 average_loss += train_loss
 
                 if (i+1) % 500 == 0:
-                    LOGGER.info('tensorflow iteration %d, average loss %f',
-                                    i+1, average_loss / 500)
+                    #LOGGER.info('tensorflow iteration %d, average loss %f',
+                                    #i+1, average_loss / 500)
                     average_loss = 0
             average_loss = 0
 
@@ -184,8 +190,8 @@ class PolicyOptTf(PolicyOpt):
 
             average_loss += train_loss
             if (i+1) % 50 == 0:
-                LOGGER.info('tensorflow iteration %d, average loss %f',
-                             i+1, average_loss / 50)
+                #LOGGER.info('tensorflow iteration %d, average loss %f',
+                             #i+1, average_loss / 50)
                 average_loss = 0
 
         feed_dict = {self.obs_tensor: obs}
@@ -282,5 +288,6 @@ class PolicyOptTf(PolicyOpt):
         with tempfile.NamedTemporaryFile('w+b', delete=True) as f:
             f.write(state['wts'])
             f.seek(0)
-            self.restore_model(f.name)
+            #import ipdb; ipdb.set_trace()
+            #self.restore_model(f.name)
 

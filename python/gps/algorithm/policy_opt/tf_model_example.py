@@ -212,7 +212,7 @@ def multi_modal_network_fp(dim_input=27, dim_output=7, batch_size=25, network_co
     first_dense_size = conv_out_size + len(x_idx)
 
     # Store layers weight & bias
-    with tf.variable_scope('conv_params'):
+    with tf.variable_scope('conv_params', reuse=True):
         weights = {
             'wc1': init_weights([filter_size, filter_size, num_channels, num_filters[0]], name='wc1'), # 5x5 conv, 1 input, 32 outputs
             'wc2': init_weights([filter_size, filter_size, num_filters[0], num_filters[1]], name='wc2'), # 5x5 conv, 32 inputs, 64 outputs
