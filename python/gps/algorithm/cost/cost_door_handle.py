@@ -47,32 +47,21 @@ class CostFKBlock(Cost):
         lxx = np.zeros((T, dX, dX))
         lux = np.zeros((T, dU, dX))
 
-        offset = np.zeros((T, 3))
-        offset[:,0] = self._hyperparams['offset'][0]
-        offset[:,1] = self._hyperparams['offset'][1]
-        offset[:,2] = self._hyperparams['offset'][2]
         # Choose target.
         pt = sample.get(END_EFFECTOR_POINTS)
-        pt_ee_l = pt[:, 0:3]
-        pt_ee_r = pt[:, 3:6]
-        pt_ee_avg = 0.5*(pt_ee_r + pt_ee_l)
+        pt_ee_top = pt[:, 0:3]
+        pt_ee_bottom = pt[:, 3:6]
+        pt_handle_top = pt[:, 6:9]
+        pt_handle_bottom = pt[:, 9:12]
 
 
-        handle = pt[:, 6:9]
-
-        #print offset
-
-        pt_block = [e1 + e2 for e1, e2 in zip(handle, offset)]
-        dist = pt_ee_avg - pt_block
-        # dist = np.concatenate([dist, np.zeros((T,3))], axis=1)
+        #pt_ee_avg = 0.5*(pt_ee_r + pt_ee_l)
+        #pt_block = pt[:, 6:9]
+        #dist = pt_ee_avg - pt_block
         wp= np.ones((T,3))
-        # import IPython
-        # IPython.embed()
-        # print(wp)
-        # TODO - These should be partially zeros so we're not double
-        #        counting.
-        #        (see pts_jacobian_only in matlab costinfos code)
+       
         jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
+        jx_1 = (jx[:, 0:3, :] - jx[:, 6:9, :])
         jx_1 = 0.5*(jx[:, 0:3, :] + jx[:, 3:6, :])- jx[:, 6:9, :]
         # Evaluate penalty term. Use estimated Jacobians and no higher
         # order terms.
