@@ -10,7 +10,7 @@ from gps.proto.gps_pb2 import JOINT_ANGLES, END_EFFECTOR_POINTS, \
         END_EFFECTOR_POINT_JACOBIANS
 
 
-class CostFKBlock(Cost):
+class CostDoorHandle(Cost):
     """
     Forward kinematics cost function. Used for costs involving the end
     effector position.
@@ -54,15 +54,26 @@ class CostFKBlock(Cost):
         pt_handle_top = pt[:, 6:9]
         pt_handle_bottom = pt[:, 9:12]
 
+        if self._hyperparams['point'] == 1:
+            dist = pt_ee_top - pt_handle_top
+            jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
+            jx_1 = (jx[:, 0:3, :] - jx[:, 6:9, :])
+        elif self._hyperparams['point'] == 2:
+            dist = pt_ee_bottom - pt_handle_bottom
+            jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
+            jx_1 = (jx[:, 3:6, :] - jx[:, 9:12, :])
+
+
+
 
         #pt_ee_avg = 0.5*(pt_ee_r + pt_ee_l)
         #pt_block = pt[:, 6:9]
         #dist = pt_ee_avg - pt_block
         wp= np.ones((T,3))
        
-        jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
-        jx_1 = (jx[:, 0:3, :] - jx[:, 6:9, :])
-        jx_1 = 0.5*(jx[:, 0:3, :] + jx[:, 3:6, :])- jx[:, 6:9, :]
+        #jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
+        #jx_1 = (jx[:, 0:3, :] - jx[:, 6:9, :])
+        #jx_1 = 0.5*(jx[:, 0:3, :] + jx[:, 3:6, :])- jx[:, 6:9, :]
         # Evaluate penalty term. Use estimated Jacobians and no higher
         # order terms.
         jxx_zeros = np.zeros((T, dist.shape[1], jx.shape[2], jx.shape[2]))

@@ -47,22 +47,12 @@ class CostFKBlock(Cost):
         lxx = np.zeros((T, dX, dX))
         lux = np.zeros((T, dU, dX))
 
-        offset = np.zeros((T, 3))
-        offset[:,0] = self._hyperparams['offset'][0]
-        offset[:,1] = self._hyperparams['offset'][1]
-        offset[:,2] = self._hyperparams['offset'][2]
         # Choose target.
         pt = sample.get(END_EFFECTOR_POINTS)
         pt_ee_l = pt[:, 0:3]
         pt_ee_r = pt[:, 3:6]
         pt_ee_avg = 0.5*(pt_ee_r + pt_ee_l)
-
-
-        handle = pt[:, 6:9]
-
-        #print offset
-
-        pt_block = [e1 + e2 for e1, e2 in zip(handle, offset)]
+        pt_block = pt[:, 6:9]
         dist = pt_ee_avg - pt_block
         # dist = np.concatenate([dist, np.zeros((T,3))], axis=1)
         wp= np.ones((T,3))
@@ -87,4 +77,4 @@ class CostFKBlock(Cost):
         sample.agent.pack_data_x(lxx, lss,
                                  data_types=[JOINT_ANGLES, JOINT_ANGLES])
 
-        return l, lx, lu, lxx, luu, lux
+    return l, lx, lu, lxx, luu, lux
