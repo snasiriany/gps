@@ -47,11 +47,31 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         # Initialize world/run kinematics
         self._init(condition)
 
+
+        #print self._hyperparams['offset']
+
         # Initialize sample with stuff from _data
         data = self._model[condition].data
         sample.set(JOINT_ANGLES, data.qpos.flatten(), t=0)
         sample.set(JOINT_VELOCITIES, data.qvel.flatten(), t=0)
         eepts = data.site_xpos.flatten()
+        
+
+
+        #print eepts
+        #top points
+        baseindex = 6
+        for i in range(3):
+            eepts[i+baseindex] += self._hyperparams['offset'][i]
+
+
+        #bottom points
+        baseindex = 9
+        for i in range(3):
+            eepts[i+baseindex] += self._hyperparams['offset'][i]
+        #print eepts
+        #print "\n"
+
         sample.set(END_EFFECTOR_POINTS, eepts, t=0)
         sample.set(END_EFFECTOR_POINT_VELOCITIES, np.zeros_like(eepts), t=0)
         jac = np.zeros([eepts.shape[0], self._model[condition].nq])
@@ -95,6 +115,22 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         sample.set(JOINT_ANGLES, np.array(mj_X[self._joint_idx]), t=t+1)
         sample.set(JOINT_VELOCITIES, np.array(mj_X[self._vel_idx]), t=t+1)
         curr_eepts = self._data.site_xpos.flatten()
+
+
+        #print curr_eepts
+        #top points
+        baseindex = 6
+        for i in range(3):
+            curr_eepts[i+baseindex] += self._hyperparams['offset'][i]
+
+
+        #bottom points
+        baseindex = 9
+        for i in range(3):
+            curr_eepts[i+baseindex] += self._hyperparams['offset'][i]
+        #print curr_eepts
+        #print "\n"
+
         sample.set(END_EFFECTOR_POINTS, curr_eepts, t=t+1)
         prev_eepts = sample.get(END_EFFECTOR_POINTS, t=t)
         eept_vels = (curr_eepts - prev_eepts) / self._hyperparams['dt']
