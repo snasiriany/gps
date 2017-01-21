@@ -49,19 +49,18 @@ class CostDoorHandle(Cost):
 
         # Choose target.
         pt = sample.get(END_EFFECTOR_POINTS)
-        pt_ee_top = pt[:, 0:3]
-        pt_ee_bottom = pt[:, 3:6]
-        pt_handle_top = pt[:, 6:9]
-        pt_handle_bottom = pt[:, 9:12]
+        pt_finger = pt[:, 0:3]
+        pt_handle_A = pt[:, 3:6]
+        pt_handle_B = pt[:, 6:9]
 
-        if self._hyperparams['point'] == 1:
-            dist = pt_ee_top - pt_handle_top
+        if self._hyperparams['point'] == 'A':
+            dist = pt_finger - pt_handle_A
+            jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
+            jx_1 = (jx[:, 0:3, :] - jx[:, 3:6, :])
+        elif self._hyperparams['point'] == 'B':
+            dist = pt_finger - pt_handle_B
             jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
             jx_1 = (jx[:, 0:3, :] - jx[:, 6:9, :])
-        elif self._hyperparams['point'] == 2:
-            dist = pt_ee_bottom - pt_handle_bottom
-            jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
-            jx_1 = (jx[:, 3:6, :] - jx[:, 9:12, :])
 
 
 

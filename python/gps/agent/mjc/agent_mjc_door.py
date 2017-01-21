@@ -59,16 +59,16 @@ class AgentMuJoCoDoor(AgentMuJoCo):
 
 
         #print eepts
-        #top points
+        #A points
+        baseindex = 3
+        for i in range(3):
+            eepts[i+baseindex] += self._hyperparams['offsetA'][i]
+
+
+        #B points
         baseindex = 6
         for i in range(3):
-            eepts[i+baseindex] += self._hyperparams['offset'][i]
-
-
-        #bottom points
-        baseindex = 9
-        for i in range(3):
-            eepts[i+baseindex] += self._hyperparams['offset'][i]
+            eepts[i+baseindex] += self._hyperparams['offsetB'][i]
         #print eepts
         #print "\n"
 
@@ -119,15 +119,15 @@ class AgentMuJoCoDoor(AgentMuJoCo):
 
         #print curr_eepts
         #top points
-        baseindex = 6
+        baseindex = 3
         for i in range(3):
-            curr_eepts[i+baseindex] += self._hyperparams['offset'][i]
+            curr_eepts[i+baseindex] += self._hyperparams['offsetA'][i]
 
 
         #bottom points
-        baseindex = 9
+        baseindex = 6
         for i in range(3):
-            curr_eepts[i+baseindex] += self._hyperparams['offset'][i]
+            curr_eepts[i+baseindex] += self._hyperparams['offsetB'][i]
         #print curr_eepts
         #print "\n"
 
