@@ -28,7 +28,10 @@ class CostSum(Cost):
 
         # Compute weighted sum of each cost value and derivatives.
         weight = self._weights[0]
+
         l = l * weight
+        #print l
+
         lx = lx * weight
         lu = lu * weight
         lxx = lxx * weight
@@ -37,10 +40,12 @@ class CostSum(Cost):
         for i in range(1, len(self._costs)):
             pl, plx, plu, plxx, pluu, plux = self._costs[i].eval(sample)
             weight = self._weights[i]
+            #print pl*weight
             l = l + pl * weight
             lx = lx + plx * weight
             lu = lu + plu * weight
             lxx = lxx + plxx * weight
             luu = luu + pluu * weight
             lux = lux + plux * weight
+        #print "\n"
         return l, lx, lu, lxx, luu, lux

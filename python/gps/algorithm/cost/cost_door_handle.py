@@ -37,7 +37,10 @@ class CostDoorHandle(Cost):
             self._hyperparams['ramp_option'], T,
             wp_final_multiplier=self._hyperparams['wp_final_multiplier']
         )
+
         wp = self._hyperparams['wp'] * np.expand_dims(wpm, axis=-1)
+
+
 
         # Initialize terms.
         l = np.zeros(T)
@@ -52,6 +55,7 @@ class CostDoorHandle(Cost):
         pt_finger = pt[:, 0:3]
         pt_handle_A = pt[:, 3:6]
         pt_handle_B = pt[:, 6:9]
+        pt_handle_C = pt[:, 9:12]
 
         if self._hyperparams['point'] == 'A':
             dist = pt_finger - pt_handle_A
@@ -61,6 +65,10 @@ class CostDoorHandle(Cost):
             dist = pt_finger - pt_handle_B
             jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
             jx_1 = (jx[:, 0:3, :] - jx[:, 6:9, :])
+        elif self._hyperparams['point'] == 'C':
+            dist = pt_finger - pt_handle_B
+            jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
+            jx_1 = (jx[:, 0:3, :] - jx[:, 9:12, :])
 
 
 
