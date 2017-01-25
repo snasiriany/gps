@@ -72,6 +72,14 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         #print eepts
         #print "\n"
 
+
+        #C or Center points
+        baseindex = 9
+        for i in range(3):
+            eepts[i+baseindex] += self._hyperparams['offsetC'][i]
+        #print eepts
+        #print "\n"
+
         sample.set(END_EFFECTOR_POINTS, eepts, t=0)
         sample.set(END_EFFECTOR_POINT_VELOCITIES, np.zeros_like(eepts), t=0)
         jac = np.zeros([eepts.shape[0], self._model[condition].nq])
@@ -129,6 +137,14 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         for i in range(3):
             curr_eepts[i+baseindex] += self._hyperparams['offsetB'][i]
         #print curr_eepts
+        #print "\n"
+
+
+        #C or Center points
+        baseindex = 9
+        for i in range(3):
+            curr_eepts[i+baseindex] += self._hyperparams['offsetC'][i]
+        #print eepts
         #print "\n"
 
         sample.set(END_EFFECTOR_POINTS, curr_eepts, t=t+1)
