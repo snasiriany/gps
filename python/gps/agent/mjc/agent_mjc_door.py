@@ -144,7 +144,7 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         return 0
 
     def save_gif(self):
-        self.RGB2video(np.array(self.images), nameFile="/home/soroush/research/project/experiments/door_open/" + "video_" + str(self.count), framerate=1/self._hyperparams['dt'])
+        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['trial_dir'] + "video_" + str(self.count), framerate=1/self._hyperparams['dt'])
         self.images = []
         self.count += 1
 
