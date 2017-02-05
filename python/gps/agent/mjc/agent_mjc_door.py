@@ -31,8 +31,7 @@ class AgentMuJoCoDoor(AgentMuJoCo):
     def _setup_world(self, filename):
         super(AgentMuJoCoDoor, self)._setup_world(filename)
         self.images = []
-        self.iter = 0
-        self.sample = 1
+        self.count = 1
 
 
     def sample(self, policy, condition, verbose=True, save=True, noisy=True):
@@ -80,11 +79,6 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         self._viewer_bot.cam.azimuth = cam_pos[5]
 
         # Take the sample.
-
-        if self.sample % self._hyperparams['samples'] == 1:
-            self.sample = 1
-            self.iter += 1
-
         for t in range(self.T):
             X_t = new_sample.get_X(t=t)
             obs_t = new_sample.get_obs(t=t)
@@ -96,8 +90,7 @@ class AgentMuJoCoDoor(AgentMuJoCo):
                 self._viewer[condition].loop_once()
 
 
-            if self.iter == self._hyperparams['iterations']:
-                self._store_image()
+            self._store_image(t)
 
             if (t + 1) < self.T:
                 for _ in range(self._hyperparams['substeps']):
@@ -111,9 +104,7 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         if save:
             self._samples[condition].append(new_sample)
 
-        if self.iter == self._hyperparams['iterations']:
-            self.save_video()
-        self.sample += 1
+        self.save_gif()
         return new_sample
 
     def RGB2video(self, data, nameFile='video', verbosity=1, indent=0, framerate=24, codec='mpeg4', threads=4):
@@ -152,11 +143,12 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         # TODO: fix circular  import rlog
         return 0
 
-    def save_video(self):
-        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['trial_dir'] + "video_" + str(self.sample), framerate=1/self._hyperparams['dt'])
+    def save_gif(self):
+        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['trial_dir'] + "video_" + str(self.count), framerate=1/self._hyperparams['dt'])
         self.images = []
+        self.count += 1
 
-    def _store_image(self):
+    def _store_image(self,t):
         """
         store image at time index t
         """
