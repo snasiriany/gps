@@ -31,7 +31,8 @@ class AgentMuJoCoDoor(AgentMuJoCo):
     def _setup_world(self, filename):
         super(AgentMuJoCoDoor, self)._setup_world(filename)
         self.images = []
-        self.count = 1
+        self.iter_num = 0
+        self.sample_num = 1
 
 
     def sample(self, policy, condition, verbose=True, save=True, noisy=True):
@@ -46,6 +47,10 @@ class AgentMuJoCoDoor(AgentMuJoCo):
             noisy: Whether or not to use noise during sampling.
         """
         # Create new sample, populate first time step.
+        if self.sample_num % self._hyperparams['samples'] == 1:
+            self.iter_num += 1
+            self.sample_num = 1
+        
         new_sample = self._init_sample(condition)
         mj_X = self._hyperparams['x0'][condition]
         U = np.zeros([self.T, self.dU])
@@ -90,7 +95,8 @@ class AgentMuJoCoDoor(AgentMuJoCo):
                 self._viewer[condition].loop_once()
 
 
-            self._store_image(t)
+            if (self.iter_num == self._hyperparams['iterations']) and (self.sample_num == 1):
+                self._store_image()
 
             if (t + 1) < self.T:
                 for _ in range(self._hyperparams['substeps']):
@@ -104,7 +110,9 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         if save:
             self._samples[condition].append(new_sample)
 
-        self.save_gif()
+        if (self.iter_num == self._hyperparams['iterations']) and (self.sample_num == 1):
+            self.save_video()
+        self.sample_num += 1
         return new_sample
 
     def RGB2video(self, data, nameFile='video', verbosity=1, indent=0, framerate=24, codec='mpeg4', threads=4):
@@ -143,12 +151,10 @@ class AgentMuJoCoDoor(AgentMuJoCo):
         # TODO: fix circular  import rlog
         return 0
 
-    def save_gif(self):
-        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['trial_dir'] + "video_" + str(self.count), framerate=1/self._hyperparams['dt'])
-        self.images = []
-        self.count += 1
+    def save_video(self):
+        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['video_dir'] + "video", framerate=1/self._hyperparams['dt'])
 
-    def _store_image(self,t):
+    def _store_image(self):
         """
         store image at time index t
         """
