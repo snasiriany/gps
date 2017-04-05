@@ -166,9 +166,11 @@ class AgentMuJoCo(Agent):
                 self._viewer_bot.loop_once()
                 self._viewer[condition].loop_once()
 
-
-            if (self._hyperparams['video']) and (self.iter_num == self._hyperparams['iterations']) and (self.sample_num == 1):
-                self._store_image()
+            if self.sample_num == 1:
+                if (self._hyperparams['video'] == "every_iter"):
+                    self._store_image()
+                elif (self._hyperparams['video'] == "last_iter") and (self.iter_num == self._hyperparams['iterations']):
+                    self._store_image()
 
             if (t + 1) < self.T:
                 for _ in range(self._hyperparams['substeps']):
@@ -182,8 +184,17 @@ class AgentMuJoCo(Agent):
         if save:
             self._samples[condition].append(new_sample)
 
-        if (self._hyperparams['video']) and (self.iter_num == self._hyperparams['iterations']):
-            self.save_video(self.sample_num)
+        if self.sample_num == 1:
+            if (self._hyperparams['video'] == "every_iter"):
+                self.save_video(name = "video_" + str(self.iter_num) + "." + str(self.sample_num))
+
+            elif (self._hyperparams['video'] == "last_iter") and (self.iter_num == self._hyperparams['iterations']):
+                self.save_video(name = "video_" + str(self.iter_num) + "." + str(self.sample_num))
+
+
+        #
+        # if (self._hyperparams['video']) and (self.iter_num == self._hyperparams['iterations']):
+        #     self.save_video(self.sample_num)
         self.sample_num += 1
         return new_sample
 
@@ -226,8 +237,9 @@ class AgentMuJoCo(Agent):
 
 
 
-    def save_video(self, sample_num):
-        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['video_dir'] + "video_" + str(sample_num), framerate=1/self._hyperparams['dt'])
+    def save_video(self, name):
+        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['video_dir'] + name, framerate=1/self._hyperparams['dt'])
+        self.images = []
 
     def _store_image(self):
         """
