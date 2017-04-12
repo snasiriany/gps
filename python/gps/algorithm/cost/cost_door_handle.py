@@ -66,7 +66,7 @@ class CostDoorHandle(Cost):
             jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
             jx_1 = (jx[:, 0:3, :] - jx[:, 6:9, :])
         elif self._hyperparams['point'] == 'C':
-            dist = pt_finger - pt_handle_B
+            dist = pt_finger - pt_handle_C
             jx = sample.get(END_EFFECTOR_POINT_JACOBIANS)
             jx_1 = (jx[:, 0:3, :] - jx[:, 9:12, :])
 
