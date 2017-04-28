@@ -16,7 +16,7 @@ def init_bias(shape, name=None):
 def batched_matrix_vector_multiply(vector, matrix):
     """ computes x^T A in mini-batches. """
     vector_batch_as_matricies = tf.expand_dims(vector, [1])
-    mult_result = tf.batch_matmul(vector_batch_as_matricies, matrix)
+    mult_result = tf.matmul(vector_batch_as_matricies, matrix) #tf.batch_matmul()
     squeezed_result = tf.squeeze(mult_result, [1])
     return squeezed_result
 
@@ -283,5 +283,3 @@ def get_xavier_weights(filter_shape, poolsize=(2, 2)):
     low = -4*np.sqrt(6.0/(fan_in + fan_out)) # use 4 for sigmoid, 1 for tanh activation
     high = 4*np.sqrt(6.0/(fan_in + fan_out))
     return tf.Variable(tf.random_uniform(filter_shape, minval=low, maxval=high, dtype=tf.float32))
-
-

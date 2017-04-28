@@ -50,6 +50,8 @@ class GPSMain(object):
         config['algorithm']['agent'] = self.agent
         self.algorithm = config['algorithm']['type'](config['algorithm'])
 
+        self._hyperparams['video'] = self._hyperparams.get('video', None) #video logging added line
+
     def run(self, itr_load=None):
         """
         Run training by iteratively sampling and taking an iteration.
@@ -153,6 +155,12 @@ class GPSMain(object):
             pol = self.algorithm.policy_opt.policy
         else:
             pol = self.algorithm.cur[cond].traj_distr
+
+        video_dir = None
+        if (i == 0) and ((self._hyperparams['video'] == 'every_iter') or \
+            ((self._hyperparams['video'] == 'last_iter') and (itr == self._hyperparams['iterations'] - 1))):
+            video_dir = self._hyperparams['common']['data_files_dir'] + '.'.join([str(i) for i in [itr, cond, i]])
+
         if self.gui:
             self.gui.set_image_overlays(cond)   # Must call for each new cond.
             redo = True
@@ -177,7 +185,8 @@ class GPSMain(object):
                 )
                 self.agent.sample(
                     pol, cond,
-                    verbose=(i < self._hyperparams['verbose_trials'])
+                    verbose=(i < self._hyperparams['verbose_trials']),
+                    video_dir=video_dir
                 )
 
                 if self.gui.mode == 'request' and self.gui.request == 'fail':
@@ -189,7 +198,8 @@ class GPSMain(object):
         else:
             self.agent.sample(
                 pol, cond,
-                verbose=(i < self._hyperparams['verbose_trials'])
+                verbose=(i < self._hyperparams['verbose_trials']),
+                video_dir=video_dir
             )
 
     def _take_iteration(self, itr, sample_lists):

@@ -56,7 +56,7 @@ class AgentMuJoCo(Agent):
         else:
             for i in range(self._hyperparams['conditions']):
                 self._model.append(mujoco_py.MjModel(self._hyperparams['filename'][i]))
-                
+
         for i in range(self._hyperparams['conditions']):
             for j in range(len(self._hyperparams['pos_body_idx'][i])):
                 idx = self._hyperparams['pos_body_idx'][i][j]
@@ -81,17 +81,17 @@ class AgentMuJoCo(Agent):
                 self.x0.append(self._hyperparams['x0'][i])
 
         cam_pos = self._hyperparams['camera_pos']
-        self._viewer_main = mujoco_py.MjViewer(visible=False, init_width=AGENT_MUJOCO['image_width'], 
+        self._viewer_main = mujoco_py.MjViewer(visible=False, init_width=AGENT_MUJOCO['image_width'],
                     init_height=AGENT_MUJOCO['image_height'])
         self._viewer_main.start()
-        
-        self._viewer_bot = mujoco_py.MjViewer(visible=False, init_width=AGENT_MUJOCO['image_width'], 
+
+        self._viewer_bot = mujoco_py.MjViewer(visible=self._hyperparams.get('visible', False), init_width=AGENT_MUJOCO['image_width'],
                     init_height=AGENT_MUJOCO['image_height'])
         self._viewer_bot.start()
 
         self._viewer = []
         for i in range(self._hyperparams['conditions']):
-            self._viewer.append(mujoco_py.MjViewer(visible=False, 
+            self._viewer.append(mujoco_py.MjViewer(visible=False,
                 init_width=self._hyperparams['image_width'], init_height=self._hyperparams['image_height']))
         for i in range(self._hyperparams['conditions']):
             self._viewer[i].start()
@@ -103,9 +103,6 @@ class AgentMuJoCo(Agent):
             self._viewer[i].cam.distance = cam_pos[3]
             self._viewer[i].cam.elevation = cam_pos[4]
             self._viewer[i].cam.azimuth = cam_pos[5]
-        self.images = []
-        self.iter_num = 0
-        self.sample_num = 1
 
     def sample(self, policy, condition, verbose=True, save=True, noisy=True):
         """
@@ -118,11 +115,6 @@ class AgentMuJoCo(Agent):
             save: Whether or not to store the trial into the samples.
             noisy: Whether or not to use noise during sampling.
         """
-        # Create new sample, populate first time step.
-        if self.sample_num % self._hyperparams['samples'] == 1:
-            self.iter_num += 1
-            self.sample_num = 1
-        
         new_sample = self._init_sample(condition)
         mj_X = self._hyperparams['x0'][condition]
         U = np.zeros([self.T, self.dU])
@@ -166,12 +158,6 @@ class AgentMuJoCo(Agent):
                 self._viewer_bot.loop_once()
                 self._viewer[condition].loop_once()
 
-            if self.sample_num == 1:
-                if (self._hyperparams['video'] == "every_iter"):
-                    self._store_image()
-                elif (self._hyperparams['video'] == "last_iter") and (self.iter_num == self._hyperparams['iterations']):
-                    self._store_image()
-
             if (t + 1) < self.T:
                 for _ in range(self._hyperparams['substeps']):
                     self._model[condition].data.ctrl = mj_U
@@ -184,92 +170,7 @@ class AgentMuJoCo(Agent):
         if save:
             self._samples[condition].append(new_sample)
 
-        if self.sample_num == 1:
-            if (self._hyperparams['video'] == "every_iter"):
-                self.save_video(name = "video_" + str(self.iter_num) + "." + str(self.sample_num))
-
-            elif (self._hyperparams['video'] == "last_iter") and (self.iter_num == self._hyperparams['iterations']):
-                self.save_video(name = "video_" + str(self.iter_num) + "." + str(self.sample_num))
-
-
-        #
-        # if (self._hyperparams['video']) and (self.iter_num == self._hyperparams['iterations']):
-        #     self.save_video(self.sample_num)
-        self.sample_num += 1
         return new_sample
-
-    def RGB2video(self, data, nameFile='video', verbosity=1, indent=0, framerate=24, codec='mpeg4', threads=4):
-        '''
-
-        :param data: np.array N x H x W x 3
-        :param nameFile:
-        :param verbosity:
-        :param indent:
-        :return:
-        '''
-        # Write to FFMPEG
-        import imageio
-        #imageio.plugins.ffmpeg.download()
-        from moviepy.video.io.ffmpeg_writer import FFMPEG_VideoWriter as fwv
-
-
-        extension = '.mp4'  # '.avi'
-        fullNameVideo = nameFile + extension
-        n_frame = data.shape[0]
-        resolution = (data.shape[2], data.shape[1])  # (W, H)
-        #print('Resolution: %d x %d fps: %d n_frames: %d' % (resolution[0], resolution[1], framerate, n_frame))
-        #print('Saving to file: ' + fullNameVideo)
-        a = fwv(filename=fullNameVideo, codec=codec, size=resolution, fps=framerate, preset="slower", threads=threads)
-
-        for i in range(n_frame):
-            # frame = np.swapaxes(data[i, :], 1, 2)
-            frame = data[i, :].astype('uint8')
-            assert np.all(0 <= frame) and np.all(frame <= 255), 'Value of the pixels is not in [0-255]'
-            a.write_frame(frame)
-            # plt.figure()
-            # plt.imshow(frame/255)
-            # plt.show
-        a.close()
-        # rlog.cnd_status(current_verbosity=verbosity, necessary_verbosity=1, f=0)
-        # TODO: fix circular  import rlog
-        return 0
-
-
-
-
-    def save_video(self, name):
-        self.RGB2video(np.array(self.images), nameFile=self._hyperparams['video_dir'] + name, framerate=1/self._hyperparams['dt'])
-        self.images = []
-
-    def _store_image(self):
-        """
-        store image at time index t
-        """
-
-        """
-        if self._hyperparams['additional_viewer']:
-            self._large_viewer.loop_once()
-        """
-
-        img_string, width, height = self._viewer_bot.get_image()
-        largeimage = np.fromstring(img_string, dtype='uint8').reshape(AGENT_MUJOCO['image_height'], AGENT_MUJOCO['image_width'], 3)[::-1,:,:]
-        self.images.append(largeimage)
-        
-        """
-        self.large_images.append(largeimage)
-        """
-
-        ######
-        #small viewer:
-        """
-        self.model_nomarkers.data.qpos = self._model.data.qpos
-        self.model_nomarkers.data.qvel = self._model.data.qvel
-        self.model_nomarkers.step()
-        self._small_viewer.loop_once()
-
-        img_string, width, height = self._small_viewer.get_image()
-        img = np.fromstring(img_string, dtype='uint8').reshape((height, width, self._hyperparams['image_channels']))[::-1,:,:]
-        """
 
     def _init(self, condition):
         """
@@ -287,7 +188,7 @@ class AgentMuJoCo(Agent):
         mjlib.mj_comPos(self._model[condition].ptr, self._model[condition].data.ptr)
         mjlib.mj_tendon(self._model[condition].ptr, self._model[condition].data.ptr)
         mjlib.mj_transmission(self._model[condition].ptr, self._model[condition].data.ptr)
-        
+
     def _init_sample(self, condition):
         """
         Construct a new sample and fill in the first time step.
