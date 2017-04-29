@@ -22,7 +22,7 @@ from gps.sample.sample_list import SampleList
 
 class GPSMain(object):
     """ Main class to run algorithms and experiments. """
-    def __init__(self, config, quit_on_end=False):
+    def __init__(self, config, quit_on_end=True):
         """
         Initialize GPSMain
         Args:
