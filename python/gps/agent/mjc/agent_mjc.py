@@ -85,7 +85,7 @@ class AgentMuJoCo(Agent):
                     init_height=AGENT_MUJOCO['image_height'])
         self._viewer_main.start()
 
-        self._viewer_bot = mujoco_py.MjViewer(visible=self._hyperparams.get('visible', False), init_width=AGENT_MUJOCO['image_width'],
+        self._viewer_bot = mujoco_py.MjViewer(visible=self._hyperparams.get('simulate', False), init_width=AGENT_MUJOCO['image_width'],
                     init_height=AGENT_MUJOCO['image_height'])
         self._viewer_bot.start()
 
@@ -264,3 +264,11 @@ class AgentMuJoCo(Agent):
             img_string, width, height = self._viewer[condition].get_image()#CHANGES
             img = np.fromstring(img_string, dtype='uint8').reshape(height, width, 3)[::-1,:,:]
             sample.set(RGB_IMAGE, np.transpose(img, (2, 1, 0)).flatten(), t=t+1)
+
+
+    def finish(self):
+        self._viewer_main.finish()
+        self._viewer_bot.finish()
+        for viewer in self._viewer:
+            viewer.finish()
+
